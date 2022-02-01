@@ -4,14 +4,16 @@ const ItemType = {
   Sulfuras: 'Sulfuras, Hand of Ragnaros',
   AgedBrie: 'Aged Brie',
   ConcertTicket: 'Backstage passes to a TAFKAL80ETC concert',
-  CoolItem: "super cool item"
+  CoolItem: "super cool item",
+  Conjured: 'Conjured'
 };
 
 const QUALITY = {
   sulfurasQuality: 80,
   agedBrieQuality: 2,
   concertQuality: 5,
-  coolItemQuality: 20
+  coolItemQuality: 20,
+  conjuredQuality: 20
 };
 
 describe("Gilded Rose", function() {
@@ -23,6 +25,17 @@ describe("Gilded Rose", function() {
     for (let i = 0; i < 10; i++) {
       items = gildedRose.updateQuality();
       expect(items[0].sellIn).toBe(sellIn);
+    }
+  });
+
+  it(`should not modify the quality of a Sulfuras item (remains ${QUALITY.sulfurasQuality})`, function() {
+    const quality = QUALITY.sulfurasQuality;
+    const sellIn = 5;
+    let items = [new Item(ItemType.Sulfuras, sellIn, quality)];
+    const gildedRose = new Shop(items);
+    for (let i = 0; i < 10; i++) {
+      items = gildedRose.updateQuality();
+      expect(items[0].quality).toBe(quality);
     }
   });
 
@@ -95,7 +108,21 @@ describe("Gilded Rose", function() {
     }
   });
 
-  it("should degrade twice as fast once the sell by date has passed", function() {
+  it("should degrade non-special items by 1 each day", function() {
+    let quality = QUALITY.coolItemQuality;
+    const sellIn = 10;
+    let items = [new Item(ItemType.CoolItem, sellIn, quality)];
+    const gildedRose = new Shop(items);
+    for (let i = sellIn; i > 0; i--) {
+      items = gildedRose.updateQuality();
+      if (quality > 0) {
+        quality = quality - 1;
+      }
+      expect(items[0].quality).toBe(quality);
+    }
+  });
+
+  it("should degrade non-special items twice as fast once the sell by date has passed", function() {
     let quality = QUALITY.coolItemQuality;
     const sellIn = 0;
     let items = [new Item(ItemType.CoolItem, sellIn, quality)];
@@ -109,20 +136,38 @@ describe("Gilded Rose", function() {
       }
       expect(items[0].quality).toBe(quality);
     }
+
   });
 
-  it("should degrade by 1 each day", function() {
-    let quality = QUALITY.coolItemQuality;
+  it("should degrade conjured items by 2 each day", function() {
+    let quality = QUALITY.conjuredQuality;
     const sellIn = 10;
-    let items = [new Item(ItemType.CoolItem, sellIn, quality)];
+    let items = [new Item(ItemType.Conjured, sellIn, quality)];
     const gildedRose = new Shop(items);
     for (let i = sellIn; i > 0; i--) {
       items = gildedRose.updateQuality();
       if (quality > 0) {
-        quality = quality - 1;
+        quality = quality - 2;
       }
       expect(items[0].quality).toBe(quality);
     }
+  });
+
+  it("should degrade conjured items twice as fast once the sell by date has passed", function() {
+    let quality = QUALITY.conjuredQuality;
+    const sellIn = 0;
+    let items = [new Item(ItemType.Conjured, sellIn, quality)];
+    const gildedRose = new Shop(items);
+    for (let i = 0; i > -3; i--) {
+      items = gildedRose.updateQuality();
+      if (quality > 1) {
+        quality = quality - 4;
+      } else {
+        quality = 0;
+      }
+      expect(items[0].quality).toBe(quality);
+    }
+
   });
 
   it("should never have quality less than 0", function() {

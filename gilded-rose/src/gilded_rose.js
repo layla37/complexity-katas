@@ -1,7 +1,8 @@
 const ITEMS = {
   Sulfuras: 'Sulfuras, Hand of Ragnaros',
   AgedBrie: 'Aged Brie',
-  ConcertTicket: 'Backstage passes to a TAFKAL80ETC concert'
+  ConcertTicket: 'Backstage passes to a TAFKAL80ETC concert',
+  Conjured: 'Conjured'
 };
 
 
@@ -19,54 +20,70 @@ class Shop {
   }
   updateQuality() {
     for (let i = 0; i < this.items.length; i++) {
+      let itemName = this.items[i].name;
+      let itemQuality = this.items[i].quality;
+      let itemSellIn = this.items[i].sellIn;
+      
+      switch (itemName) {
+        case ITEMS.Sulfuras:
+          break;
+        
+        case ITEMS.AgedBrie:
+          if(itemSellIn > 0) {
+            itemQuality = itemQuality + 1;
+          }
+          else {
+            itemQuality = itemQuality + 2;
+          }
+          itemSellIn = itemSellIn-1;
+          break;
+        
+        case ITEMS.ConcertTicket:
+          if(itemSellIn > 10) {
+            itemQuality = itemQuality + 1;
+          } 
+          else if (itemSellIn <= 10 && itemSellIn > 5) {
+            itemQuality = itemQuality + 2;
+          }
+          else if (itemSellIn <= 5 && itemSellIn > 0) {
+            itemQuality = itemQuality + 3;
+          }
+          else {
+            itemQuality = 0;
+          }
+          itemSellIn = itemSellIn - 1;
+          break;
 
-      if (this.items[i].name !== ITEMS.AgedBrie && this.items[i].name !== ITEMS.ConcertTicket && this.items[i].name != ITEMS.Sulfuras) {
-        if (this.items[i].quality > 0) {
-          // for non specialty items, decrease quality by 1
-          this.items[i].quality = this.items[i].quality - 1;     
-        }
-      } else {
-        // specialty items
-        if (this.items[i].quality < 50) {
-          this.items[i].quality = this.items[i].quality + 1;
-          if (this.items[i].name === ITEMS.ConcertTicket) {
-            if (this.items[i].sellIn < 11) {
-              if (this.items[i].quality < 50) {
-                // increase quality by 1
-                this.items[i].quality = this.items[i].quality + 1;
-              }
-            }
-            if (this.items[i].sellIn < 6) {
-              if (this.items[i].quality < 50) {
-                // increase quality by 1
-                this.items[i].quality = this.items[i].quality + 1;
-              }
-            }
+        case ITEMS.Conjured:
+          if(itemSellIn <= 0) {
+            itemQuality = itemQuality - 4;
           }
-        }
-      }
-      if (this.items[i].name != ITEMS.Sulfuras) {
-        // decrease quality by 1
-        this.items[i].sellIn = this.items[i].sellIn - 1;
-      }
-      if (this.items[i].sellIn < 0) {
-        if (this.items[i].name !== ITEMS.AgedBrie) {
-          if (this.items[i].name !== ITEMS.ConcertTicket) {
-            if (this.items[i].quality > 0) {
-              if (this.items[i].name !== ITEMS.Sulfuras) {
-                // decrease quality by 1
-                this.items[i].quality = this.items[i].quality - 1;
-              }
-            }
-          } else {
-            this.items[i].quality = 0;
+          else {
+            itemQuality = itemQuality - 2;
           }
-        } else {
-          if (this.items[i].quality < 50) {
-            this.items[i].quality = this.items[i].quality + 1;
+          itemSellIn = itemSellIn - 1;
+          break;
+
+        default:
+          if(itemSellIn <= 0) {
+            itemQuality = itemQuality - 2;
           }
-        }
+          else {
+            itemQuality = itemQuality - 1;
+          }
+          itemSellIn = itemSellIn - 1;
+          break;
       }
+
+      if(itemName !== ITEMS.Sulfuras && itemQuality > 50) {
+          itemQuality = 50;
+      }
+      if(itemQuality < 0) {
+          itemQuality = 0;
+      }
+
+      this.items[i].quality = itemQuality
+      this.items[i].sellIn = itemSellIn
     }
 
     return this.items;
